@@ -276,3 +276,4 @@ st.markdown("<h3>📋 Student Data Table</h3>", unsafe_allow_html=True)
 st.dataframe(filtered_df, use_container_width=True)
 
 st.success("✅ Filters heading removed and all bar charts now show alternating dark & light colors for every bar.")
+
