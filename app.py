@@ -1,279 +1,351 @@
+# ==========================================================
+# COMPLETE STUDENT COUNSELLING DASHBOARD (ONE FILE)
+# KPI → Colored Circle (Center)
+# Gender → Pie Chart (Blue & Orange)
+# All Charts → Blue, Orange, Light Yellow, Light Orange
+# District-wise Gender Added
+# 1 Row = 2 Charts
+# Legends → Bottom & Center
+# KPI in Circle
+# Logo → Top Left
+# Footer → Bottom Center (Vikramshila Education Resource Society)
+# ==========================================================
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from urllib.parse import quote
+from streamlit_gsheets import GSheetsConnection
+from PIL import Image
 
-# ================= PAGE CONFIG =================
-st.set_page_config(page_title="Student Career Counselling Dashboard", layout="wide")
+# ----------------------------------------------------------
+# PAGE CONFIG
+# ----------------------------------------------------------
+st.set_page_config(
+    page_title="Student Career Counselling Dashboard",
+    layout="wide",
+    page_icon="📊"
+)
 
-# ================= STYLE =================
-st.markdown("""
-<style>
-.stApp {background: linear-gradient(135deg,#f7fbff,#fff8fc,#faf6ff);}
-h1,h2,h3 { text-align:center; color:#2c3e50; }
-.block-container { padding-top:0.8rem; }
+# ----------------------------------------------------------
+# LOGO + TITLE HEADER
+# ----------------------------------------------------------
+header_col1, header_col2 = st.columns([1,6])
 
-.kpi-box{
-    background: linear-gradient(135deg,#1abc9c,#16a085);
-    padding:10px;
-    border-radius:15px;
-    color:white;
-    text-align:center;
-    font-size:14px;
-    font-weight:600;
-    box-shadow:0 3px 8px rgba(0,0,0,0.2);
-}
+with header_col1:
+    # Put your logo file in same folder and name it: logo.png
+    logo = Image.open("logo.png")
+    st.image(logo, width=120)
 
-/* Light filter boxes */
-div[data-baseweb="select"] > div {
-    background-color: #f1f6ff !important;
-    border-radius: 6px;
-    border: 1px solid #d6e4ff;
-}
-</style>
-""", unsafe_allow_html=True)
+with header_col2:
+    st.markdown(
+        "<h1 style='text-align:center;'>Student Career Counselling Dashboard</h1>",
+        unsafe_allow_html=True
+    )
 
-st.title("🎓 Student Career Counselling Dashboard")
-# ================= GOOGLE SHEET =================
-SHEET_ID = "1eXiH5-lACW7_x8VA7Fp7SQsBcW1uhf15Zy1AieU5wGE"
-SHEET_NAME = "Sheet1"
+# ----------------------------------------------------------
+# TITLE BOX FUNCTION
+# ----------------------------------------------------------
+def box_title(text):
+    st.markdown(
+        f"""
+        <div style="
+            background:#f2f2f2;
+            padding:10px;
+            border-radius:8px;
+            text-align:center;
+            font-weight:700;
+            font-size:20px;
+            border:1px solid #ccc;
+            margin-bottom:10px;">
+            {text}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
+# ----------------------------------------------------------
+# LOAD DATA
+# ----------------------------------------------------------
 @st.cache_data(ttl=60)
 def load_data():
-    encoded = quote(SHEET_NAME)
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={encoded}"
-    return pd.read_csv(url)
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    data = conn.read()
+    if data is None:
+        return pd.DataFrame()
+    df = pd.DataFrame(data)
+    df = df.dropna(how="all")
+    return df
 
 df = load_data()
 
-# ================= AUTO COLUMN FINDER =================
-def find_col(keyword):
-    for c in df.columns:
-        if keyword.lower() in c.lower():
-            return c
-    return None
+if df.empty:
+    st.error("Google Sheet se data load nahi ho raha hai.")
+    st.stop()
 
-COL_DISTRICT = find_col("district")
-COL_SCHOOL   = find_col("school")
-COL_CLASS    = find_col("class")
-COL_GENDER   = find_col("gender")
-COL_PREV     = find_col("previous")
-COL_STREAM   = find_col("stream")
+# ----------------------------------------------------------
+# CLEANING
+# ----------------------------------------------------------
+text_cols = [
+    "District","School","Gender","Class","Stream",
+    "CII-1","CII-2","CII-3",
+    "Suggest Career Path-1","Suggest Career Path-2","Suggest Career Path-3",
+    "Entrance Examination -1","Entrance Examination -2","Entrance Examination -3"
+]
 
-SUB1 = find_col("subject 1")
-SUB2 = find_col("subject 2")
-SUB3 = find_col("subject 3")
+for c in text_cols:
+    if c in df.columns:
+        df[c] = (
+            df[c].astype(str)
+            .str.strip()
+            .replace(["nan","NaN","None",""], pd.NA)
+        )
 
-CII1 = find_col("cii")
-CAR1 = find_col("career")
-ENTRANCE = find_col("entrance")
+# Remove undefined values everywhere
+df = df.replace(["undefined", "Undefined", "UNDEFINED", ""], pd.NA)
 
-# Clean base columns
-for col in [COL_DISTRICT, COL_SCHOOL, COL_CLASS, COL_GENDER]:
-    if col:
-        df[col] = df[col].astype(str).str.strip()
+# ----------------------------------------------------------
+# COLORS
+# ----------------------------------------------------------
+COLORS = ["#1f77b4", "#ff7f0e", "#fff2b2", "#ffd8a8"]
 
-# ================= FILTERS (WITHOUT HEADING) =================
-f1, f2, f3 = st.columns(3)
+# ----------------------------------------------------------
+# KPI (CIRCLE STYLE)
+# ----------------------------------------------------------
+box_title("Key Performance Indicators")
 
-with f1:
-    district = st.selectbox("District", ["All"] + sorted(df[COL_DISTRICT].dropna().unique()))
-with f2:
-    school = st.selectbox("School", ["All"] + sorted(df[COL_SCHOOL].dropna().unique()))
-with f3:
-    class_name = st.selectbox("Class", ["All"] + sorted(df[COL_CLASS].dropna().unique()))
-
-filtered_df = df.copy()
-if district != "All":
-    filtered_df = filtered_df[filtered_df[COL_DISTRICT] == district]
-if school != "All":
-    filtered_df = filtered_df[filtered_df[COL_SCHOOL] == school]
-if class_name != "All":
-    filtered_df = filtered_df[filtered_df[COL_CLASS] == class_name]
-
-st.markdown("---")
-
-# ================= KPI =================
 k1, k2, k3, k4 = st.columns(4)
 
-k1.markdown(f"<div class='kpi-box'>Students<br>{len(filtered_df)}</div>", unsafe_allow_html=True)
-k2.markdown(f"<div class='kpi-box'>Schools<br>{filtered_df[COL_SCHOOL].nunique()}</div>", unsafe_allow_html=True)
-k3.markdown(f"<div class='kpi-box'>Districts<br>{filtered_df[COL_DISTRICT].nunique()}</div>", unsafe_allow_html=True)
+def kpi_circle(title, value, color):
+    st.markdown(
+        f"""
+        <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="
+                background:{color};
+                width:110px;
+                height:110px;
+                border-radius:50%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                color:white;
+                font-size:26px;
+                font-weight:700;">
+                {value}
+            </div>
+            <div style="margin-top:6px;font-weight:600;">{title}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-if COL_PREV:
-    avg_prev = round(pd.to_numeric(filtered_df[COL_PREV], errors="coerce").mean(), 2)
-else:
-    avg_prev = "N/A"
-
-k4.markdown(f"<div class='kpi-box'>Avg % Previous Class<br>{avg_prev}</div>", unsafe_allow_html=True)
+with k1: kpi_circle("Students", len(df), "#1f77b4")
+with k2: kpi_circle("Districts", df["District"].nunique(), "#ff7f0e")
+with k3: kpi_circle("Schools", df["School"].nunique(), "#1f77b4")
+with k4: kpi_circle("Classes", df["Class"].nunique(), "#ff7f0e")
 
 st.markdown("---")
 
-# ================= COLOR SYSTEM (DARK + LIGHT ALTERNATING) =================
-DARK_COLORS = ["#0B5ED7", "#198754", "#6F42C1", "#DC3545", "#FD7E14"]
-LIGHT_COLORS = ["#9EC5FE", "#A3CFBB", "#C5B3E6", "#F1AEB5", "#FFD8A8"]
-
-def alternating_colors(n):
-    colors = []
-    for i in range(n):
-        if i % 2 == 0:
-            colors.append(DARK_COLORS[i % len(DARK_COLORS)])
-        else:
-            colors.append(LIGHT_COLORS[i % len(LIGHT_COLORS)])
-    return colors
-
-def style_fig(fig):
-    fig.update_traces(textposition="outside", texttemplate="%{y}", cliponaxis=False)
-    fig.update_layout(
-        legend=dict(orientation="h", yanchor="top", y=-0.25,
-                    xanchor="center", x=0.5, title_text=""),
-        margin=dict(t=60, b=140, l=40, r=40),
-        height=380,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)"
-    )
-    return fig
-
-# ================= STUDENT DISTRIBUTION =================
-st.markdown("<h3>📍 Student Distribution</h3>", unsafe_allow_html=True)
+# ==========================================================
+# ROW 1 → Gender Pie + District-wise Gender
+# ==========================================================
 c1, c2 = st.columns(2)
 
 with c1:
-    dist_count = filtered_df[COL_DISTRICT].value_counts().reset_index()
-    dist_count.columns = ["District", "Value"]
-    fig = px.bar(
-        dist_count, x="District", y="Value",
-        color="District",
-        text="Value",
-        color_discrete_sequence=alternating_colors(len(dist_count)),
-        title="District Wise Students"
-    )
-    st.plotly_chart(style_fig(fig), use_container_width=True)
+    box_title("Gender-wise Student Distribution")
 
-with c2:
-    gender_count = filtered_df[COL_GENDER].value_counts().reset_index()
-    gender_count.columns = ["Gender", "Value"]
+    gender_df = df["Gender"].dropna().value_counts().reset_index()
+    gender_df.columns = ["Gender", "Students"]
+
     fig = px.pie(
-        gender_count, names="Gender", values="Value",
-        title="Gender Ratio",
-        color_discrete_sequence=alternating_colors(len(gender_count))
+        gender_df,
+        names="Gender",
+        values="Students",
+        hole=0.4,
+        color_discrete_sequence=["#ff7f0e", "#1f77b4"]
     )
-    fig.update_traces(texttemplate="%{value} (%{percent})")
+    fig.update_layout(
+        legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center")
+    )
     st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("---")
+with c2:
+    box_title("District-wise Gender Distribution")
 
-# ================= SCHOOL & CLASS =================
-st.markdown("<h3>🏫 School & Class Distribution</h3>", unsafe_allow_html=True)
-c3, c4 = st.columns(2)
-
-with c3:
-    school_count = filtered_df[COL_SCHOOL].value_counts().reset_index()
-    school_count.columns = ["School", "Value"]
-    fig = px.bar(
-        school_count, x="School", y="Value",
-        color="School",
-        text="Value",
-        color_discrete_sequence=alternating_colors(len(school_count)),
-        title="School Wise Students"
-    )
-    st.plotly_chart(style_fig(fig), use_container_width=True)
-
-with c4:
-    temp = filtered_df.copy()
-    temp["Class_clean"] = temp[COL_CLASS].astype(str).str.extract(r"(\d+)")
-    temp = temp.dropna(subset=["Class_clean"])
-    temp["Class_clean"] = temp["Class_clean"].astype(int)
-
-    class_count = temp["Class_clean"].value_counts().reset_index()
-    class_count.columns = ["Class", "Value"]
-    class_count = class_count.sort_values(by="Class")
-    class_count["Class_label"] = class_count["Class"].apply(lambda x: f"Class {x}")
+    dg = df.dropna(subset=["District","Gender"]).groupby(
+        ["District","Gender"]
+    ).size().reset_index(name="Students")
 
     fig = px.bar(
-        class_count, x="Class_label", y="Value",
-        color="Class_label",
-        text="Value",
-        category_orders={"Class_label": class_count["Class_label"].tolist()},
-        color_discrete_sequence=alternating_colors(len(class_count)),
-        title="Class Wise Students"
-    )
-    st.plotly_chart(style_fig(fig), use_container_width=True)
-
-st.markdown("---")
-
-# ================= Career Interest Inventory =================
-st.markdown("<h3>📑 Career Interest Inventory Test </h3>", unsafe_allow_html=True)
-
-cii_data = []
-if CII1:
-    cii_data += filtered_df[CII1].dropna().astype(str).tolist()
-cii_data = [x for x in cii_data if x.strip() != ""]
-
-if cii_data:
-    cii_count = pd.Series(cii_data).value_counts().reset_index()
-    cii_count.columns = ["CII Result", "Students"]
-    fig = px.bar(
-        cii_count, x="CII Result", y="Students",
-        color="CII Result",
+        dg,
+        x="District",
+        y="Students",
+        color="Gender",
+        barmode="group",
         text="Students",
-        color_discrete_sequence=alternating_colors(len(cii_count)),
-        title="CII Test Results Distribution"
+        color_discrete_sequence=COLORS
     )
-    st.plotly_chart(style_fig(fig), use_container_width=True)
 
+    fig.update_traces(textposition="outside")
+
+    fig.update_layout(
+        xaxis_title="",        # Remove "District" text
+        yaxis_title="",        # Optional: remove Y axis label
+        bargap=0.25,           # Space between districts
+        bargroupgap=0.1,       # Space between gender bars
+        legend=dict(
+            orientation="h",
+            y=-0.35,
+            x=0.5,
+            xanchor="center",
+            title_text=""      # Remove "Gender" heading
+        ),
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 st.markdown("---")
 
-# ================= CAREER DISTRIBUTION  =================
-st.markdown("<h3>🎯 Career Distribution </h3>", unsafe_allow_html=True)
+# ==========================================================
+# ROW 2 → Class-wise + CII
+# ==========================================================
+c1, c2 = st.columns(2)
 
-career_data = []
-if CAR1:
-    career_data += filtered_df[CAR1].dropna().astype(str).tolist()
+with c1:
+    box_title("Class-wise Student Count")
 
-career_data = [x.strip() for x in career_data if x.strip() != ""]
-
-if career_data:
-    career_count = pd.Series(career_data).value_counts().reset_index()
-    career_count.columns = ["Career", "Students"]
-    career_count = career_count.sort_values(by="Students", ascending=False).head(10)
+    class_df = df["Class"].dropna().value_counts().reset_index()
+    class_df.columns = ["Class", "Students"]
 
     fig = px.bar(
-        career_count, x="Career", y="Students",
-        color="Career",
+        class_df,
+        x="Class",
+        y="Students",
+        color="Class",
         text="Students",
-        color_discrete_sequence=alternating_colors(len(career_count)),
-        title="Top 10 Career Preferences (High to Low)"
+        color_discrete_sequence=COLORS
     )
-    st.plotly_chart(style_fig(fig), use_container_width=True)
+    fig.update_traces(textposition="outside")
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            y=-0.25,
+            x=0.5,
+            xanchor="center",
+            title_text=""
+        )
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("---")
+with c2:
+    box_title("CII Test – Career Interest Distribution")
 
-# ================= ENTRANCE EXAM =================
-if ENTRANCE:
-    ent = filtered_df[ENTRANCE].dropna().astype(str).tolist()
-    ent = [x for x in ent if x.strip() != ""]
-    if ent:
-        ent_count = pd.Series(ent).value_counts().reset_index()
-        ent_count.columns = ["Entrance Exam", "Students"]
+    cii_vals = []
+    for c in ["CII-1","CII-2","CII-3"]:
+        if c in df.columns:
+            cii_vals.extend(df[c].dropna().tolist())
+
+    if cii_vals:
+        df_cii = pd.Series(cii_vals).value_counts().reset_index()
+        df_cii.columns = ["Interest Area", "Students"]
+
         fig = px.bar(
-            ent_count, x="Entrance Exam", y="Students",
+            df_cii,
+            x="Interest Area",
+            y="Students",
+            color="Interest Area",
+            text="Students",
+            color_discrete_sequence=COLORS
+        )
+        fig.update_traces(textposition="outside")
+        fig.update_layout(
+            legend=dict(orientation="h", y=-0.4, x=0.5, xanchor="center")
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("---")
+
+# ==========================================================
+# ROW 3 → Career Path + Entrance Exam
+# ==========================================================
+c1, c2 = st.columns(2)
+
+with c1:
+    box_title("Top 10 Suggested Career Paths")
+
+    cp_vals = []
+    for c in ["Suggest Career Path-1","Suggest Career Path-2","Suggest Career Path-3"]:
+        if c in df.columns:
+            cp_vals.extend(df[c].dropna().tolist())
+
+    if cp_vals:
+        df_cp = pd.Series(cp_vals).value_counts().head(10).reset_index()
+        df_cp.columns = ["Career Path", "Students"]
+
+        fig = px.bar(
+            df_cp,
+            x="Career Path",
+            y="Students",
+            color="Career Path",
+            text="Students",
+            color_discrete_sequence=COLORS
+        )
+        fig.update_traces(textposition="outside")
+        fig.update_layout(
+            legend=dict(orientation="h", y=-0.45, x=0.5, xanchor="center")
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+with c2:
+    box_title("Entrance Examination Preferences")
+
+    ee_vals = []
+    for c in ["Entrance Examination -1","Entrance Examination -2","Entrance Examination -3"]:
+        if c in df.columns:
+            ee_vals.extend(df[c].dropna().tolist())
+
+    if ee_vals:
+        df_ee = pd.Series(ee_vals).value_counts().reset_index()
+        df_ee.columns = ["Entrance Exam", "Students"]
+
+        fig = px.bar(
+            df_ee,
+            x="Entrance Exam",
+            y="Students",
             color="Entrance Exam",
             text="Students",
-            color_discrete_sequence=alternating_colors(len(ent_count)),
-            title="Entrance Examination Distribution"
+            color_discrete_sequence=COLORS
         )
-        st.plotly_chart(style_fig(fig), use_container_width=True)
+        fig.update_traces(textposition="outside")
+        fig.update_layout(
+            legend=dict(orientation="h", y=-0.45, x=0.5, xanchor="center")
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("---")
 
-# ================= DOWNLOAD & TABLE =================
-st.markdown("<h3>📥 Download Filtered Data</h3>", unsafe_allow_html=True)
-csv = filtered_df.to_csv(index=False).encode("utf-8")
-st.download_button("Download CSV", csv, "filtered_students.csv", "text/csv")
+# ==========================================================
+# FULL DATA TABLE
+# ==========================================================
+box_title("Complete Student Data Table")
+st.dataframe(df, use_container_width=True)
 
-st.markdown("<h3>📋 Student Data Table</h3>", unsafe_allow_html=True)
-st.dataframe(filtered_df, use_container_width=True)
-
-st.success("✅ Filters heading removed and all bar charts now show alternating dark & light colors for every bar.")
-
+# ----------------------------------------------------------
+# FOOTER (BOTTOM CENTER)
+# ----------------------------------------------------------
+st.markdown(
+    """
+    <div style="
+        position:fixed;
+        left:0;
+        bottom:0;
+        width:100%;
+        background:#f2f2f2;
+        text-align:center;
+        padding:8px;
+        font-weight:600;
+        border-top:1px solid #ccc;">
+        © Vikramshila Education Resource Society
+    </div>
+    """,
+    unsafe_allow_html=True
+)
