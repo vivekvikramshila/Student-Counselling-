@@ -14,7 +14,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from streamlit_gsheets import GSheetsConnection
 from PIL import Image
 
 # ----------------------------------------------------------
@@ -68,11 +67,8 @@ def box_title(text):
 # ----------------------------------------------------------
 @st.cache_data(ttl=60)
 def load_data():
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    data = conn.read()
-    if data is None:
-        return pd.DataFrame()
-    df = pd.DataFrame(data)
+    conn = st.connection("gsheets", type="gsheets")
+    df = conn.read()
     df = df.dropna(how="all")
     return df
 
@@ -349,3 +345,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
