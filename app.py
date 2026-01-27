@@ -147,7 +147,7 @@ st.markdown("---")
 c1, c2 = st.columns(2)
 
 with c1:
-    box_title("Gender-wise Student Distribution")
+    box_title("Number of Student Gender-wise")
 
     gender_df = df["Gender"].dropna().value_counts().reset_index()
     gender_df.columns = ["Gender", "Students"]
@@ -207,7 +207,7 @@ st.markdown("---")
 c1, c2 = st.columns(2)
 
 with c1:
-    box_title("Class-wise Student Count")
+    box_title("Class-wise Student")
 
     class_df = df["Class"].dropna().value_counts().reset_index()
     class_df.columns = ["Class", "Students"]
@@ -233,7 +233,7 @@ with c1:
     st.plotly_chart(fig, use_container_width=True)
 
 with c2:
-    box_title("CII Test – Career Interest Distribution")
+    box_title("CII Test – Career Path Distribution")
 
     cii_vals = []
     for c in ["CII-1","CII-2","CII-3"]:
@@ -345,6 +345,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
