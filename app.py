@@ -11,10 +11,11 @@
 # Footer → Bottom Center (Vikramshila Education Resource Society)
 # ==========================================================
 
-import streamlit as st
 import pandas as pd
+import streamlit as st
 import plotly.express as px
 from PIL import Image
+import os
 
 # ----------------------------------------------------------
 # PAGE CONFIG
@@ -67,8 +68,8 @@ def box_title(text):
 # ----------------------------------------------------------
 @st.cache_data(ttl=60)
 def load_data():
-    conn = st.connection("gsheets")   # <-- sirf itna likhna hai
-    df = conn.read()
+    sheet_url = "https://docs.google.com/spreadsheets/d/1eXiH5-lACW7_x8VA7Fp7SQsBcW1uhf15Zy1AieU5wGE/export?format=csv"
+    df = pd.read_csv(sheet_url)
     df = df.dropna(how="all")
     return df
 
@@ -345,5 +346,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
