@@ -67,7 +67,7 @@ def box_title(text):
 # ----------------------------------------------------------
 @st.cache_data(ttl=60)
 def load_data():
-    conn = st.connection("gsheets", type="gsheets")
+    conn = st.connection("gsheets")   # <-- sirf itna likhna hai
     df = conn.read()
     df = df.dropna(how="all")
     return df
@@ -345,4 +345,5 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
