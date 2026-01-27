@@ -1,5 +1,8 @@
 streamlit
 pandas
 plotly
-numpy
+streamlit-gsheets
+Pillow
+
+
 
