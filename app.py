@@ -38,10 +38,9 @@ with header_col1:
 
 with header_col2:
     st.markdown(
-        "<h1 style='text-align:center;'>Student Career Counselling Dashboard</h1>",
-        unsafe_allow_html=True
-    )
-
+    "<h1 style='text-align:center; color:#0b3c91;'>Student Career Counselling Dashboard</h1>",
+    unsafe_allow_html=True
+)
 # ----------------------------------------------------------
 # TITLE BOX FUNCTION
 # ----------------------------------------------------------
@@ -346,6 +345,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
