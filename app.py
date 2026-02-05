@@ -55,7 +55,7 @@ def box_title(text):
 # ----------------------------------------------------------
 # LOAD DATA
 # ----------------------------------------------------------
-@st.cache_data
+@st.cache_data(ttl=60)
 def load_data():
     url = "https://docs.google.com/spreadsheets/d/1eXiH5-lACW7_x8VA7Fp7SQsBcW1uhf15Zy1AieU5wGE/export?format=csv"
     return pd.read_csv(url).dropna(how="all")
@@ -374,4 +374,5 @@ st.markdown(
     "© Vikramshila Education Resource Society</div>",
     unsafe_allow_html=True
 )
+
 
