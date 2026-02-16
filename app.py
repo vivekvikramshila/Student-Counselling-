@@ -13,7 +13,7 @@ import os
 # PAGE CONFIG
 # ----------------------------------------------------------
 st.set_page_config(
-    page_title=" Dashboard of Counselling",
+    page_title=" Dashboard of Counselling of Student",
     layout="wide",
     page_icon="📊"
 )
@@ -387,4 +387,5 @@ st.markdown(
     "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
+
 
