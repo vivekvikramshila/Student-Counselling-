@@ -425,11 +425,12 @@ summary.index.name = "Sr No"
 st.dataframe(
     summary,
     use_container_width=True,
-    height=300
+    height=280
 )
 
 st.markdown(
     "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
+
 
