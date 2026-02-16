@@ -32,7 +32,7 @@ with h1:
 
 with h2:
     st.markdown(
-        "<h1 style='text-align:center;color:#0b3c91;'>Dashboard of Counselling</h1>",
+        "<h1 style='text-align:center;color:#0b3c91;'>Dashboard of Counselling of Student</h1>",
         unsafe_allow_html=True
     )
 
@@ -387,5 +387,6 @@ st.markdown(
     "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
+
 
 
