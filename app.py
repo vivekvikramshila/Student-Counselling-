@@ -13,12 +13,12 @@ import os
 # PAGE CONFIG
 # ----------------------------------------------------------
 st.set_page_config(
-    page_title=" Dashboard of Counselling of Students",
+    page_title=" Dashboard of Counselling",
     layout="wide",
     page_icon="📊"
 )
 
-CHART_HEIGHT = 400
+CHART_HEIGHT = 430
 FONT_SIZE = 12
 COLORS = ["#1f77b4", "#ff7f0e", "#fff2b2", "#b6e3c6"]
 
@@ -235,8 +235,11 @@ st.markdown("---")
 # ==========================================================
 # ROW 3 → SUBJECT + CII
 # ==========================================================
+CHART_HEIGHT = 400
+
 c1, c2 = st.columns(2)
 
+# ================= SUBJECT CHART =================
 with c1:
     box_title("Subject-wise Distribution (%)")
 
@@ -259,9 +262,33 @@ with c1:
     )
 
     fig = bar_style(fig)
-    fig.update_layout(showlegend=False)
+
+    fig.update_layout(
+        height=CHART_HEIGHT,
+        showlegend=False,
+        font=dict(family="Arial", size=13),
+
+        legend=dict(
+            orientation="h",
+            y=-0.28,
+            x=0.5,
+            xanchor="center",
+            yanchor="top",
+            font=dict(
+                family="Arial",
+                size=11,
+                color="black"
+            ),
+            traceorder="normal"
+        ),
+
+        margin=dict(b=130)
+    )
+
     st.plotly_chart(fig, use_container_width=True)
 
+
+# ================= CII CHART =================
 with c2:
     box_title("CII – Career Interest Distribution (%)")
 
@@ -284,8 +311,31 @@ with c2:
     )
 
     fig = bar_style(fig)
-    fig.update_layout(showlegend=False)
+
+    fig.update_layout(
+        height=CHART_HEIGHT,
+        showlegend=False,
+        font=dict(family="Arial", size=13),
+
+        legend=dict(
+            orientation="h",
+            y=-0.28,
+            x=0.5,
+            xanchor="center",
+            yanchor="top",
+            font=dict(
+                family="Arial",
+                size=11,
+                color="black"
+            ),
+            traceorder="normal"
+        ),
+
+        margin=dict(b=130)
+    )
+
     st.plotly_chart(fig, use_container_width=True)
+
 
 st.markdown("---")
 
@@ -372,12 +422,13 @@ for col in ["Class 10 Male", "Class 10 Female", "Class 12 Male", "Class 12 Femal
 
 summary.index += 1
 summary.index.name = "Sr No"
-st.dataframe(summary, use_container_width=True)
+st.dataframe(
+    summary,
+    use_container_width=True,
+    height=300
+)
 
-
-
-
-
-
-
-
+st.markdown(
+    "<hr style='border:1px solid #ccc;'>",
+    unsafe_allow_html=True
+)
