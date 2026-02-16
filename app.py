@@ -18,7 +18,7 @@ st.set_page_config(
     page_icon="📊"
 )
 
-CHART_HEIGHT = 400
+CHART_HEIGHT = 380
 FONT_SIZE = 12
 COLORS = ["#1f77b4", "#ff7f0e", "#fff2b2", "#b6e3c6"]
 
@@ -432,5 +432,6 @@ st.markdown(
     "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
+
 
 
