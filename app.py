@@ -1,6 +1,6 @@
 # ==========================================================
-# COMPLETE STUDENT CAREER COUNSELLING DASHBOARD
-# FULL & FINAL VERSION – NOTHING MISSING
+# Career Guidance & Counseling Dashboard
+# FULL VERSION – NORMAL A4 PRINT
 # ==========================================================
 
 import pandas as pd
@@ -13,17 +13,17 @@ import os
 # PAGE CONFIG
 # ----------------------------------------------------------
 st.set_page_config(
-    page_title="Student Career Counselling Dashboard",
+    page_title=" Dashboard of Counselling",
     layout="wide",
     page_icon="📊"
 )
 
-CHART_HEIGHT = 460
+CHART_HEIGHT = 430
 FONT_SIZE = 12
 COLORS = ["#1f77b4", "#ff7f0e", "#fff2b2", "#b6e3c6"]
 
 # ----------------------------------------------------------
-# HEADER (LOGO + CENTER TITLE)
+# HEADER
 # ----------------------------------------------------------
 h1, h2 = st.columns([1, 6])
 with h1:
@@ -32,8 +32,7 @@ with h1:
 
 with h2:
     st.markdown(
-        "<h1 style='text-align:center;color:#0b3c91;'>"
-        "Student Career Counselling Dashboard</h1>",
+        "<h1 style='text-align:center;color:#0b3c91;'>Dashboard of Counselling</h1>",
         unsafe_allow_html=True
     )
 
@@ -94,8 +93,9 @@ if school != "All":
 
 TOTAL = len(fdf)
 
+
 # ----------------------------------------------------------
-# KPI – BIG CIRCLES
+# KPI SECTION
 # ----------------------------------------------------------
 box_title("Key Performance Indicators")
 k1, k2, k3, k4 = st.columns(4)
@@ -106,9 +106,9 @@ def kpi_big(title, value, color):
         <div style="display:flex;flex-direction:column;align-items:center;">
             <div style="
                 background:{color};
-                width:140px;height:140px;border-radius:50%;
+                width:120px;height:120px;border-radius:50%;
                 display:flex;align-items:center;justify-content:center;
-                color:white;font-size:32px;font-weight:700;">
+                color:white;font-size:26px;font-weight:700;">
                 {value}
             </div>
             <div style="margin-top:8px;font-weight:700;font-size:16px;">
@@ -138,10 +138,10 @@ def bar_style(fig):
     )
     fig.update_layout(
         height=CHART_HEIGHT,
-        margin=dict(l=70, r=40, t=60, b=150),
+        margin=dict(l=30, r=20, t=40, b=70),
         legend=dict(
             orientation="h",
-            y=-0.35,
+            y=-0.25,
             x=0.5,
             xanchor="center",
             title_text=""
@@ -150,7 +150,6 @@ def bar_style(fig):
         yaxis_title=""
     )
     return fig
-
 # ==========================================================
 # ROW 1 → GENDER + DISTRICT GENDER
 # ==========================================================
@@ -240,6 +239,7 @@ c1, c2 = st.columns(2)
 
 with c1:
     box_title("Subject-wise Distribution (%)")
+
     subj_vals = []
     for col in ["Subject 1", "Subject 2", "Subject 3"]:
         if col in fdf.columns:
@@ -257,10 +257,14 @@ with c1:
         color="Subject",
         color_discrete_sequence=COLORS
     )
-    st.plotly_chart(bar_style(fig), use_container_width=True)
+
+    fig = bar_style(fig)
+    fig.update_layout(showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
 
 with c2:
     box_title("CII – Career Interest Distribution (%)")
+
     cii_vals = []
     for col in ["CII-1", "CII-2", "CII-3"]:
         if col in fdf.columns:
@@ -278,7 +282,10 @@ with c2:
         color="Interest Area",
         color_discrete_sequence=COLORS
     )
-    st.plotly_chart(bar_style(fig), use_container_width=True)
+
+    fig = bar_style(fig)
+    fig.update_layout(showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("---")
 
@@ -294,10 +301,12 @@ def class_gender_chart(cls):
         .size()
         .reset_index(name="Count")
     )
+
     d["Percentage"] = (
         d.groupby("District")["Count"]
         .transform(lambda x: round(x / x.sum() * 100, 1))
     )
+
     fig = px.bar(
         d,
         x="District",
@@ -307,7 +316,16 @@ def class_gender_chart(cls):
         custom_data=["Count", "Percentage"],
         color_discrete_sequence=COLORS
     )
-    return bar_style(fig)
+
+    fig = bar_style(fig)
+
+    # Show Count + Percentage above bar
+    fig.update_traces(
+        texttemplate="%{customdata[0]} (%{customdata[1]}%)",
+        textposition="outside"
+    )
+
+    return fig
 
 c1, c2 = st.columns(2)
 with c1:
@@ -365,14 +383,7 @@ table.index += 1
 table.index.name = "Sr No"
 st.dataframe(table, use_container_width=True)
 
-# ----------------------------------------------------------
-# FOOTER
-# ----------------------------------------------------------
 st.markdown(
-    "<div style='position:fixed;bottom:0;width:100%;text-align:center;"
-    "background:#f2f2f2;padding:8px;font-weight:600;border-top:1px solid #ccc;'>"
-    "© Vikramshila Education Resource Society</div>",
+    "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
-
-
