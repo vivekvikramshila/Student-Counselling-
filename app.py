@@ -374,19 +374,8 @@ summary.index += 1
 summary.index.name = "Sr No"
 st.dataframe(summary, use_container_width=True)
 
-# ==========================================================
-# STUDENT DATA TABLE
-# ==========================================================
-box_title("Complete Student Data Table")
-table = fdf.reset_index(drop=True)
-table.index += 1
-table.index.name = "Sr No"
-st.dataframe(table, use_container_width=True)
 
-st.markdown(
-    "<hr style='border:1px solid #ccc;'>",
-    unsafe_allow_html=True
-)
+
 
 
 
