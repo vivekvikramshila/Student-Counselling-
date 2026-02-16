@@ -32,7 +32,7 @@ with h1:
 
 with h2:
     st.markdown(
-        "<h1 style='text-align:center;color:#0b3c91;'>Dashboard of Counselling of Student</h1>",
+        "<h1 style='text-align:center;color:#0b3c91;'>Dashboard of Counselling of Students</h1>",
         unsafe_allow_html=True
     )
 
@@ -373,6 +373,7 @@ for col in ["Class 10 Male", "Class 10 Female", "Class 12 Male", "Class 12 Femal
 summary.index += 1
 summary.index.name = "Sr No"
 st.dataframe(summary, use_container_width=True)
+
 
 
 
