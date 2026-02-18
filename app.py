@@ -138,7 +138,7 @@ def bar_style(fig):
     )
     fig.update_layout(
         height=CHART_HEIGHT,
-        margin=dict(l=30, r=20, t=40, b=70),
+        margin=dict(l=25, r=20, t=40, b=60),
         legend=dict(
             orientation="h",
             y=-0.25,
@@ -432,6 +432,7 @@ st.markdown(
     "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
+
 
 
 
