@@ -235,7 +235,7 @@ st.markdown("---")
 # ==========================================================
 # ROW 3 → SUBJECT + CII
 # ==========================================================
-CHART_HEIGHT = 370
+CHART_HEIGHT = 380
 
 c1, c2 = st.columns(2)
 
@@ -266,7 +266,7 @@ with c1:
     fig.update_layout(
         height=CHART_HEIGHT,
         showlegend=False,
-        font=dict(family="Arial", size=13),
+        font=dict(family="Arial", size=11),
 
         legend=dict(
             orientation="h",
@@ -315,7 +315,7 @@ with c2:
     fig.update_layout(
         height=CHART_HEIGHT,
         showlegend=False,
-        font=dict(family="Arial", size=13),
+        font=dict(family="Arial", size=11),
 
         legend=dict(
             orientation="h",
@@ -432,6 +432,7 @@ st.markdown(
     "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
+
 
 
 
