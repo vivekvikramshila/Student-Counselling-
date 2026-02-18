@@ -235,7 +235,7 @@ st.markdown("---")
 # ==========================================================
 # ROW 3 → SUBJECT + CII
 # ==========================================================
-CHART_HEIGHT = 400
+CHART_HEIGHT = 370
 
 c1, c2 = st.columns(2)
 
@@ -432,6 +432,7 @@ st.markdown(
     "<hr style='border:1px solid #ccc;'>",
     unsafe_allow_html=True
 )
+
 
 
 
